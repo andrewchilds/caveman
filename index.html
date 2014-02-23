@@ -1,0 +1,594 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Caveman by andrewchilds</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Caveman</h1>
+        <p>A fast JavaScript template engine</p>
+        <p class="view"><a href="https://github.com/andrewchilds/caveman">View the Project on GitHub <small>andrewchilds/caveman</small></a></p>
+        <ul>
+          <li><a href="https://github.com/andrewchilds/caveman/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/andrewchilds/caveman/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/andrewchilds/caveman">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="caveman" class="anchor" href="#caveman"><span class="octicon octicon-link"></span></a>Caveman</h1>
+
+<p><img src="https://travis-ci.org/andrewchilds/caveman.png?branch=master" alt="Travis"></p>
+
+<p>Caveman is a 1KB JS templating engine, written for long-running single-page applications that render thousands or even tens of thousands of DOM elements at a time.</p>
+
+<p>Caveman's markup language is built on an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight, has zero dependencies, and adds a single <code>Caveman</code> variable to the global namespace, and seems to be <a href="#benchmarks">pretty fast</a>.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<div class="highlight highlight-sh"><pre>npm install caveman
+</pre></div>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Assuming a node application with templates in <code>app/views/templates/*.html</code> and generated assets in <code>public/bundled</code>.</p>
+
+<ol>
+<li>
+<p>Using Grunt and the <a href="https://github.com/andrewchilds/grunt-contrib-caveman">grunt-contrib-caveman</a> package, add this to your Gruntfile config:</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">caveman</span><span class="o">:</span> <span class="p">{</span>
+  <span class="nx">compile</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">src</span><span class="o">:</span> <span class="p">[</span><span class="s1">'app/views/templates/*.html'</span><span class="p">],</span>
+    <span class="nx">dest</span><span class="o">:</span> <span class="s1">'public/bundled/templates.js'</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<div class="highlight highlight-js"><pre><span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">'grunt-contrib-caveman'</span><span class="p">);</span>
+</pre></div>
+</li>
+<li><p>Run Grunt, include <code>./node_modules/caveman/caveman.js</code> and the newly created <code>./public/bundled/templates.js</code> script tags (in that order) in with your client-side javascripts however you normally would.</p></li>
+<li>
+<p>You should now have a registry of Caveman templates to use in your client-side code, like so:</p>
+
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">myTemplateData</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="nx">bar</span><span class="o">:</span> <span class="kc">true</span> <span class="p">};</span>
+<span class="kd">var</span> <span class="nx">html</span> <span class="o">=</span> <span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'myTemplateName'</span><span class="p">,</span> <span class="nx">myTemplateData</span><span class="p">);</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'foo'</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">html</span><span class="p">;</span>
+</pre></div>
+</li>
+</ol><h2>
+<a name="concepts" class="anchor" href="#concepts"><span class="octicon octicon-link"></span></a>Concepts</h2>
+
+<h3>
+<a name="escaping" class="anchor" href="#escaping"><span class="octicon octicon-link"></span></a>Escaping</h3>
+
+<p>Caveman does not escape input by default. It expects you to have already sanitized your data before rendering. If you want to escape HTML in your templates, you can do that with the <code>escape</code> macro:</p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;div&gt;</span>{{- escape d.html }}<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<h3>
+<a name="scope" class="anchor" href="#scope"><span class="octicon octicon-link"></span></a>Scope</h3>
+
+<p>Unlike most template engines, Caveman doesn't use <code>with</code> blocks or do any scope lookup. So for top-level variables you'll need to use <code>{{d.foo}}</code> instead of <code>{{foo}}</code>. Within <code>for</code> and <code>each</code> blocks, the scope of <code>d</code> becomes block-level, as illustrated here.</p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"posts"</span><span class="nt">&gt;</span>
+  {{- for d.posts as post }}
+    <span class="nt">&lt;h2&gt;</span>{{post.title}}<span class="nt">&lt;/h2&gt;</span>
+    {{- for post.images }}
+      <span class="c">&lt;!-- d is now block level. --&gt;</span>
+      <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"{{d.src}}"</span> <span class="na">alt=</span><span class="s">"{{d.alt}}"</span> <span class="nt">/&gt;</span>
+    {{- end }}
+    <span class="c">&lt;!-- Scope of d is restored. --&gt;</span>
+    {{- for post.images as image }}
+      <span class="c">&lt;!-- The scope of d is unaffected since we're using `for as`. --&gt;</span>
+      <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"{{image.src}}"</span> <span class="na">alt=</span><span class="s">"{{image.alt}}"</span> <span class="nt">/&gt;</span>
+      <span class="c">&lt;!-- We can still reference anything further up the scope chain: --&gt;</span>
+      {{d.posts[0].images[0].src}}
+    {{- end }}
+    {{- each post.images[0] }}
+      <span class="c">&lt;!-- d is now block-level. --&gt;</span>
+      {{_key}}: {{d}}
+    {{- end }}
+    {{- each post.images[0] as attr }}
+      <span class="c">&lt;!-- The scope of d is unaffected since we're using `each as`. --&gt;</span>
+      {{_key}}: {{attr}}
+      <span class="c">&lt;!-- We can still reference anything further up the scope chain: --&gt;</span>
+      {{d.posts[0].images[0].src}}
+    {{- end }}
+  {{- end }}
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<h3>
+<a name="custom-macros" class="anchor" href="#custom-macros"><span class="octicon octicon-link"></span></a>Custom Macros</h3>
+
+<p>Macros can be easily added or modified. For example, here is a macro that adds zebra stripes and "first" and "last" classes, depending on where it is in the array:</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">addMacro</span><span class="p">(</span><span class="s1">'tableClass'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">find</span><span class="o">:</span> <span class="sr">/^tableClass$/</span>
+  <span class="nx">replace</span><span class="o">:</span> <span class="s2">"str += (_i % 2 ? 'even' : 'odd');"</span> <span class="o">+</span>
+    <span class="s2">"if (_i === 0) { str += ' first'; }"</span> <span class="o">+</span>
+    <span class="s2">"if (_i === _len - 1) { str += ' last'; }"</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">rows</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nx">text</span><span class="o">:</span> <span class="s1">'a'</span> <span class="p">}</span>
+    <span class="p">{</span> <span class="nx">text</span><span class="o">:</span> <span class="s1">'b'</span> <span class="p">}</span>
+    <span class="p">{</span> <span class="nx">text</span><span class="o">:</span> <span class="s1">'c'</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+
+<span class="nx">Caveman</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- template --&gt;</span>
+<span class="nt">&lt;table&gt;</span>
+  {{- for d.rows as row }}
+    <span class="nt">&lt;tr</span> <span class="na">class=</span><span class="s">"{{- tableClass }}"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;td&gt;</span>{{_i}}: {{row.text}}<span class="nt">&lt;/td&gt;</span>
+    <span class="nt">&lt;/tr&gt;</span>
+  {{- end }}
+<span class="nt">&lt;/table&gt;</span>
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;table&gt;</span>
+  <span class="nt">&lt;tr</span> <span class="na">class=</span><span class="s">"odd first"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;td&gt;</span>0: a<span class="nt">&lt;/td&gt;</span>
+  <span class="nt">&lt;/tr&gt;</span>
+  <span class="nt">&lt;tr</span> <span class="na">class=</span><span class="s">"even"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;td&gt;</span>1: b<span class="nt">&lt;/td&gt;</span>
+  <span class="nt">&lt;/tr&gt;</span>
+  <span class="nt">&lt;tr</span> <span class="na">class=</span><span class="s">"odd last"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;td&gt;</span>2: c<span class="nt">&lt;/td&gt;</span>
+  <span class="nt">&lt;/tr&gt;</span>
+<span class="nt">&lt;/table&gt;</span>
+</pre></div>
+
+<h3>
+<a name="arbitrary-script-execution" class="anchor" href="#arbitrary-script-execution"><span class="octicon octicon-link"></span></a>Arbitrary Script Execution</h3>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">rows</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">});</span>
+</pre></div>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- template --&gt;</span>
+{{- for d.rows }}
+  <span class="nt">&lt;div&gt;</span>{{d}} x {{d}} = {{- print d * d }}<span class="nt">&lt;/div&gt;</span>
+{{- end }}
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;div&gt;</span>1 x 1 = 1<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div&gt;</span>2 x 2 = 4<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div&gt;</span>3 x 3 = 9<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<h2>
+<a name="interpolation-behavior" class="anchor" href="#interpolation-behavior"><span class="octicon octicon-link"></span></a>Interpolation Behavior</h2>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- exampleTemplate.html --&gt;</span>
+string: {{d.strings}}
+empty string: {{d.emptyString}}
+boolean false: {{d.booleanFalse}}
+boolean true: {{d.booleanTrue}}
+null: {{d.nullValue}}
+undefined: {{d.undefinedValue}}
+floats: {{d.floats}}
+integers: {{d.ints}}
+zero: {{d.zero}}
+arrays (bracket notation): {{d.arrays[2]}}
+arrays of objects (dot and bracket notation): {{d.arraysOfObjects[1].b}}
+</pre></div>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'exampleTemplate'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">strings</span><span class="o">:</span> <span class="s2">"123"</span><span class="p">,</span>
+  <span class="nx">emptyString</span><span class="o">:</span> <span class="s1">''</span><span class="p">,</span>
+  <span class="nx">booleanFalse</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="nx">booleanTrue</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="nx">nullValue</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span>
+  <span class="nx">undefinedValue</span><span class="o">:</span> <span class="kc">undefined</span><span class="p">,</span>
+  <span class="nx">floats</span><span class="o">:</span> <span class="mf">123.12</span><span class="p">,</span>
+  <span class="nx">ints</span><span class="o">:</span> <span class="mi">1234</span><span class="p">,</span>
+  <span class="nx">zero</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="nx">arrays</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+  <span class="nx">arraysOfObjects</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">c</span><span class="o">:</span> <span class="mi">3</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">c</span><span class="o">:</span> <span class="mi">3</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">});</span>
+</pre></div>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- rendered HTML --&gt;</span>
+string: 123
+empty string:
+boolean false: false
+boolean true: true
+null:
+undefined:
+floats: 123.12
+integers: 1234
+zero: 0
+arrays (bracket notation): 3
+arrays of objects (dot and bracket notation): 2
+</pre></div>
+
+<h2>
+<a name="macro-documentation" class="anchor" href="#macro-documentation"><span class="octicon octicon-link"></span></a>Macro Documentation</h2>
+
+<h4>
+<a name="--if-expression-" class="anchor" href="#--if-expression-"><span class="octicon octicon-link"></span></a>{{- if <em>expression</em> }}</h4>
+
+<h4>
+<a name="--unless-expression-" class="anchor" href="#--unless-expression-"><span class="octicon octicon-link"></span></a>{{- unless <em>expression</em> }}</h4>
+
+<h4>
+<a name="--else-" class="anchor" href="#--else-"><span class="octicon octicon-link"></span></a>{{- else }}</h4>
+
+<h4>
+<a name="--else-if-expression-" class="anchor" href="#--else-if-expression-"><span class="octicon octicon-link"></span></a>{{- else if <em>expression</em> }}</h4>
+
+<h4>
+<a name="--end-" class="anchor" href="#--end-"><span class="octicon octicon-link"></span></a>{{- end }}</h4>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"posts"</span><span class="nt">&gt;</span>
+  {{- for d.posts as post }}
+    {{- unless post.hidden }}
+      <span class="nt">&lt;h2&gt;</span>{{post.title}}<span class="nt">&lt;/h2&gt;</span>
+      {{- if post.comments.length &gt; 0 }}
+        {{- for post.comments as comment }}
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"comment"</span><span class="nt">&gt;</span>{{comment.text}}<span class="nt">&lt;/div&gt;</span>
+        {{- end }}
+      {{- else }}
+        <span class="nt">&lt;div&gt;</span>No comments!<span class="nt">&lt;/div&gt;</span>
+      {{- end }}
+    {{- end }}
+  {{- end }}
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<p>The <code>if</code>, <code>unless</code>, and <code>end</code> macros have shortcuts, respectively:</p>
+
+<h4>
+<a name="-expression-" class="anchor" href="#-expression-"><span class="octicon octicon-link"></span></a>{{? <em>expression</em> }}</h4>
+
+<h4>
+<a name="-expression--1" class="anchor" href="#-expression--1"><span class="octicon octicon-link"></span></a>{{^ <em>expression</em> }}</h4>
+
+<h4>
+<a name="" class="anchor" href="#"><span class="octicon octicon-link"></span></a>{{/}}</h4>
+
+<hr><h4>
+<a name="--for-array-" class="anchor" href="#--for-array-"><span class="octicon octicon-link"></span></a>{{- for <em>array</em> }}</h4>
+
+<h4>
+<a name="--for-array-as-obj-" class="anchor" href="#--for-array-as-obj-"><span class="octicon octicon-link"></span></a>{{- for <em>array</em> as <em>obj</em> }}</h4>
+
+<p>The <code>for</code> macro iterates through arrays. These variables are available in the block scope:</p>
+
+<ul>
+<li>
+<code>_i</code> = the current index of the for loop, starting with zero</li>
+<li>
+<code>_len</code> = the length of the for loop.</li>
+</ul><div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">users</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Jimmy'</span><span class="p">,</span> <span class="nx">email</span><span class="o">:</span> <span class="s1">'jimmy@gmail.com'</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Ralph'</span><span class="p">,</span> <span class="nx">email</span><span class="o">:</span> <span class="s1">'ralph@gmail.com'</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">};</span>
+<span class="nx">Caveman</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+</pre></div>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- template --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"users"</span><span class="nt">&gt;</span>
+  {{- for d.users as user }}
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label&gt;</span>Name<span class="nt">&lt;/label&gt;</span> <span class="nt">&lt;strong&gt;</span>{{user.name}}<span class="nt">&lt;/strong&gt;</span>
+      <span class="nt">&lt;label&gt;</span>Email<span class="nt">&lt;/label&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:{{user.email}}"</span><span class="nt">&gt;</span>{{user.email}}<span class="nt">&lt;/a&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  {{- end }}
+<span class="nt">&lt;/div&gt;</span>
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"users"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>Name<span class="nt">&lt;/label&gt;</span> <span class="nt">&lt;strong&gt;</span>Jimmy<span class="nt">&lt;/strong&gt;</span>
+    <span class="nt">&lt;label&gt;</span>Email<span class="nt">&lt;/label&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:jimmy@gmail.com"</span><span class="nt">&gt;</span>jimmy@gmail.com<span class="nt">&lt;/a&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>Name<span class="nt">&lt;/label&gt;</span> <span class="nt">&lt;strong&gt;</span>Ralph<span class="nt">&lt;/strong&gt;</span>
+    <span class="nt">&lt;label&gt;</span>Email<span class="nt">&lt;/label&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:ralph@gmail.com"</span><span class="nt">&gt;</span>ralph@gmail.com<span class="nt">&lt;/a&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<hr><h4>
+<a name="--each-obj-" class="anchor" href="#--each-obj-"><span class="octicon octicon-link"></span></a>{{- each <em>obj</em> }}</h4>
+
+<h4>
+<a name="--each-obj-as-attr-" class="anchor" href="#--each-obj-as-attr-"><span class="octicon octicon-link"></span></a>{{- each <em>obj</em> as <em>attr</em> }}</h4>
+
+<p><code>each</code> is meant for iterating through object properties, using a closure instead of a for loop. The <code>_key</code> variable is available in the block scope.</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">cars</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nx">make</span><span class="o">:</span> <span class="s1">'Volvo'</span><span class="p">,</span>
+      <span class="nx">model</span><span class="o">:</span> <span class="s1">'245s'</span><span class="p">,</span>
+      <span class="nx">year</span><span class="o">:</span> <span class="mi">1976</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nx">make</span><span class="o">:</span> <span class="s1">'Saab'</span><span class="p">,</span>
+      <span class="nx">model</span><span class="o">:</span> <span class="s1">'900s'</span><span class="p">,</span>
+      <span class="nx">year</span><span class="o">:</span> <span class="mi">1985</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">};</span>
+</pre></div>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- template --&gt;</span>
+{{- for d.cars as car }}
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"car"</span><span class="nt">&gt;</span>
+    {{- each car as attribute }}
+      <span class="nt">&lt;div&gt;</span>{{_key}}: {{attribute}}<span class="nt">&lt;/div&gt;</span>
+    {{- end }}
+  <span class="nt">&lt;/div&gt;</span>
+{{- end }}
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"car"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div&gt;</span>make: Volvo<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div&gt;</span>model: 245s<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div&gt;</span>year: 1976<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"car"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div&gt;</span>make: Saab<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div&gt;</span>model: 900s<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div&gt;</span>year: 1984<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<hr><h4>
+<a name="--with-abcobj-" class="anchor" href="#--with-abcobj-"><span class="octicon octicon-link"></span></a>{{- with <em>a.b.c.obj</em> }}</h4>
+
+<h4>
+<a name="--with-abcobj-as-obj-" class="anchor" href="#--with-abcobj-as-obj-"><span class="octicon octicon-link"></span></a>{{- with <em>a.b.c.obj</em> as <em>obj</em> }}</h4>
+
+<p><code>with</code> allows you to scope an object to <code>d</code> (or to anything, using <code>with foo as bar</code>) within a block.</p>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- template --&gt;</span>
+{{- for d.posts as post }}
+  {{- with post.author as author }}
+    <span class="nt">&lt;h2&gt;</span>{{author.name}}<span class="nt">&lt;/h2&gt;</span>
+  {{- end }}
+{{- end }}
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;div&gt;</span>1 x 1 = 1<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div&gt;</span>2 x 2 = 4<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div&gt;</span>3 x 3 = 9<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<hr><h4>
+<a name="--print-expression-" class="anchor" href="#--print-expression-"><span class="octicon octicon-link"></span></a>{{- print <em>expression</em> }}</h4>
+
+<p><code>print</code> writes the expression's returned value. The <code>_i</code> character is the current index of the array. <code>d</code> is the current value, which happens to be a string.</p>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- template --&gt;</span>
+{{- for d.rows }}
+  <span class="nt">&lt;div&gt;</span>{{d}} x {{d}} = {{- print d * d }}<span class="nt">&lt;/div&gt;</span>
+{{- end }}
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;div&gt;</span>1 x 1 = 1<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div&gt;</span>2 x 2 = 4<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div&gt;</span>3 x 3 = 9<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<hr><h4>
+<a name="--log-expression-" class="anchor" href="#--log-expression-"><span class="octicon octicon-link"></span></a>{{- log <em>expression</em> }}</h4>
+
+<p>Writes {expression} to console.log.</p>
+
+<div class="highlight highlight-js"><pre><span class="p">{{</span><span class="o">-</span> <span class="nx">log</span> <span class="nx">x</span><span class="p">.</span><span class="nx">y</span><span class="p">.</span><span class="nx">z</span> <span class="p">}}</span>
+</pre></div>
+
+<hr><h4>
+<a name="--render-partialname-" class="anchor" href="#--render-partialname-"><span class="octicon octicon-link"></span></a>{{- render <em>partialName</em> }}</h4>
+
+<h4>
+<a name="--render-partialname-context-" class="anchor" href="#--render-partialname-context-"><span class="octicon octicon-link"></span></a>{{- render <em>partialName</em> <em>context</em> }}</h4>
+
+<p>Renders partial {name} using optional {scope}.</p>
+
+<p>Compiled templates should be registered using the <code>Caveman.register</code> method so they can be used as partials.</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">'emailList'</span><span class="p">,</span> <span class="nx">emailList</span><span class="p">)</span>
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">'emailLink'</span><span class="p">,</span> <span class="nx">emailLink</span><span class="p">)</span>
+
+<span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">emails</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nx">email</span><span class="o">:</span> <span class="s1">'jimmy@gmail.com'</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Jimmy'</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">email</span><span class="o">:</span> <span class="s1">'ralph@gmail.com'</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Ralph'</span><span class="p">,</span> <span class="nx">className</span><span class="o">:</span> <span class="s1">'active'</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">email</span><span class="o">:</span> <span class="s1">'joe@gmail.com'</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Joe'</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">};</span>
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'emailList'</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+</pre></div>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- "emailList" template --&gt;</span>
+{{- for d.emails }}
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>{{- render emailLink }}<span class="nt">&lt;/div&gt;</span>
+{{- end }}
+
+<span class="c">&lt;!-- "emailLink" template --&gt;</span>
+<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:{{d.email}}"</span> <span class="na">class=</span><span class="s">"{{d.className}}"</span><span class="nt">&gt;</span>{{d.name}}<span class="nt">&lt;/a&gt;</span>
+
+<span class="c">&lt;!-- rendered HTML --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:jimmy@gmail.com"</span> <span class="na">class=</span><span class="s">""</span><span class="nt">&gt;</span>Jimmy<span class="nt">&lt;/a&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:ralph@gmail.com"</span> <span class="na">class=</span><span class="s">"active"</span><span class="nt">&gt;</span>Ralph<span class="nt">&lt;/a&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"mailto:joe@gmail.com"</span> <span class="na">class=</span><span class="s">""</span><span class="nt">&gt;</span>Joe<span class="nt">&lt;/a&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<h2>
+<a name="method-reference" class="anchor" href="#method-reference"><span class="octicon octicon-link"></span></a>Method Reference</h2>
+
+<h4>
+<a name="caveman-1" class="anchor" href="#caveman-1"><span class="octicon octicon-link"></span></a>Caveman</h4>
+
+<p>Returns either a compiled template function, or the rendered HTML if data is passed in. The latter approach should not be used in production as the compiled template is not cached.</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="c1">// returns compiled template function</span>
+<span class="nx">Caveman</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="c1">// returns rendered HTML</span>
+</pre></div>
+
+<hr><h4>
+<a name="cavemancompiletemplate" class="anchor" href="#cavemancompiletemplate"><span class="octicon octicon-link"></span></a>Caveman.compile(<em>template</em>)</h4>
+
+<p>Returns a compiled template string. If you're sending pre-compiled templates to the client, you should use this method, otherwise you don't really need to use this. If you're compiling templates on the client-side, you should just use <code>Caveman.register</code> and <code>Caveman.render</code>.</p>
+
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="s1">'{{- for d.users as user }}&lt;span&gt;{{user.name}}&lt;/span&gt;{{- end }}'</span>
+<span class="kd">var</span> <span class="nx">compiled</span> <span class="o">=</span> <span class="nx">Caveman</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
+
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">'userNames'</span><span class="p">,</span> <span class="nx">compiled</span><span class="p">);</span>
+</pre></div>
+
+<hr><h4>
+<a name="cavemanregistertemplatename-uncompiledtemplatestring" class="anchor" href="#cavemanregistertemplatename-uncompiledtemplatestring"><span class="octicon octicon-link"></span></a>Caveman.register(<em>templateName</em>, <em>uncompiledTemplateString</em>)</h4>
+
+<h4>
+<a name="cavemanregistertemplatename-compiledtemplatefunction" class="anchor" href="#cavemanregistertemplatename-compiledtemplatefunction"><span class="octicon octicon-link"></span></a>Caveman.register(<em>templateName</em>, <em>compiledTemplateFunction</em>)</h4>
+
+<p>Register a partial {name} using template {template}, allowing it to be used later on with <code>Caveman.render</code>. Accepts both compiled and uncompiled templates.</p>
+
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="s1">'{{- for d.users as user }}&lt;span&gt;{{user.name}}&lt;/span&gt;{{- end }}'</span>
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">'userNames'</span><span class="p">,</span> <span class="nx">template</span><span class="p">);</span>
+</pre></div>
+
+<hr><h4>
+<a name="cavemanrendertemplatename-data" class="anchor" href="#cavemanrendertemplatename-data"><span class="octicon octicon-link"></span></a>Caveman.render(<em>templateName</em>, <em>data</em>)</h4>
+
+<p>Render a compiled template {name} using {data}.</p>
+
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">users</span><span class="o">:</span> <span class="p">[</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Mario'</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">'Luigi'</span> <span class="p">}</span> <span class="p">]</span>
+<span class="p">}</span>
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'userNames'</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+<span class="c1">// &gt; "&lt;span&gt;Mario&lt;/span&gt;&lt;span&gt;Luigi&lt;/span&gt;"</span>
+</pre></div>
+
+<hr><h4>
+<a name="cavemanaddmacromacroname-macrodefinition" class="anchor" href="#cavemanaddmacromacroname-macrodefinition"><span class="octicon octicon-link"></span></a>Caveman.addMacro(<em>macroName</em>, <em>macroDefinition</em>)</h4>
+
+<p>Adds or updates a macro {macroName} with macro {macro}. Macros are objects with the following keys:</p>
+
+<ul>
+<li>find: Required. The regex to test the str against.</li>
+<li>replace: Required. A string or function that returns a replacement expression.</li>
+<li>blockEnd: Optional. If this is a block, what should be added during the matching {{- end }} macro.</li>
+<li>prefix: Optional. If anything needs to be added at the beginning of the compiled template.</li>
+<li>shortcut: Optional. Define a shortcut syntax for this macro.</li>
+</ul><p>All existing macros are defined using this method, for example:</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">addMacro</span><span class="p">(</span><span class="s1">'if'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">find</span><span class="o">:</span> <span class="sr">/^if /</span><span class="p">,</span>
+  <span class="nx">replace</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">str</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^if (.*)/</span><span class="p">,</span> <span class="s1">'if ($1) {'</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="nx">blockEnd</span><span class="o">:</span> <span class="s1">'}'</span><span class="p">,</span>
+  <span class="nx">shortcut</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">find</span><span class="o">:</span> <span class="sr">/^\?\s?/</span><span class="p">,</span>
+    <span class="nx">replace</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">str</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^\?\s?(.*)/</span><span class="p">,</span> <span class="s1">'- if $1'</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">addMacro</span><span class="p">(</span><span class="s1">'print'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">find</span><span class="o">:</span> <span class="sr">/^print /</span><span class="p">,</span>
+  <span class="nx">replace</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">str</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^print (.*)/</span><span class="p">,</span> <span class="s1">'str += ($1);'</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<hr><h2>
+<a name="cavemanoptions" class="anchor" href="#cavemanoptions"><span class="octicon octicon-link"></span></a>Caveman.options</h2>
+
+<p>To use custom tags (e.g. ERB-style tags), override these two options before compiling your templates:</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">openTag</span> <span class="o">=</span> <span class="s1">'&lt;%'</span><span class="p">;</span>
+<span class="nx">Caveman</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">closeTag</span> <span class="o">=</span> <span class="s1">'%&gt;'</span><span class="p">;</span>
+</pre></div>
+
+<p>Remove indentation by shrink wrapping your templates:</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">shrinkWrap</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</pre></div>
+
+<h2>
+<a name="benchmarks" class="anchor" href="#benchmarks"><span class="octicon octicon-link"></span></a>Benchmarks</h2>
+
+<p>If you only look at <a href="http://jsperf.com/js-templating-performance/5">pure rendering</a> performance, Caveman shows a dramatic performance gain over Hogan, Handlebars and Lodash:</p>
+
+<p><img src="http://i.imgur.com/7wKwTwJ.png" alt="benchmark-without-dom"></p>
+
+<p>However a more <a href="http://jsperf.com/js-templating-performance/4">real-world test</a> that includes DOM manipulation shows a more modest improvement:</p>
+
+<p><img src="http://i.imgur.com/28xpRTv.png" alt="benchmark-with-dom"></p>
+
+<p>YMMV.</p>
+
+<h2>
+<a name="running-the-jasmine-tests" class="anchor" href="#running-the-jasmine-tests"><span class="octicon octicon-link"></span></a>Running the Jasmine tests</h2>
+
+<div class="highlight highlight-sh"><pre>npm <span class="nb">test</span>
+</pre></div>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>MIT. Copyright © 2014 Andrew Childs</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/andrewchilds">andrewchilds</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-2103966-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
