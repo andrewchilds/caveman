@@ -38,7 +38,9 @@ Assuming a node application with templates in `app/views/templates/*.html` and g
     document.getElementById('foo').innerHTML = html;
     ```
 
-## Escaping
+## Concepts
+
+### Escaping
 
 Caveman does not escape input by default. It expects you to have already sanitized your data before rendering. If you want to escape HTML in your templates, you can do that with the `escape` macro:
 
@@ -46,7 +48,7 @@ Caveman does not escape input by default. It expects you to have already sanitiz
 <div>{{- escape d.html }}</div>
 ```
 
-## Scope
+### Scope
 
 Unlike most template engines, Caveman doesn't use `with` blocks or do any scope lookup. So for top-level variables you'll need to use `{{d.foo}}` instead of `{{foo}}`. Within `for` and `each` blocks, the scope of `d` becomes block-level, as illustrated here.
 
@@ -79,7 +81,7 @@ Unlike most template engines, Caveman doesn't use `with` blocks or do any scope 
 </div>
 ```
 
-## Custom Macros
+### Custom Macros
 
 Macros can be easily added or modified. For example, here is a macro that adds zebra stripes and "first" and "last" classes, depending on where it is in the array:
 
@@ -126,7 +128,7 @@ Caveman(template, data)
 </table>
 ```
 
-## Arbitrary Script Execution
+### Arbitrary Script Execution
 
 ```js
 Caveman(template, {
