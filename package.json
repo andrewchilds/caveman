@@ -1,0 +1,26 @@
+{
+  "name": "caveman",
+  "description": "Fast JS template engine",
+  "author": {
+    "name": "Andrew Childs"
+  },
+  "version": "0.1.0",
+  "main": "caveman.js",
+  "scripts": {
+    "test": "./node_modules/jasmine-node/bin/jasmine-node --coffee --color --verbose ./spec"
+  },
+  "keywords": [ "caveman", "javascript", "template", "html" ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrewchilds/caveman.git"
+  },
+  "dependencies": {
+    "jasmine-node": "1.13.1"
+  },
+  "homepage": "https://github.com/andrewchilds/caveman",
+  "bugs": {
+    "url": "https://github.com/andrewchilds/caveman/issues"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
