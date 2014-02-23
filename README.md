@@ -1,5 +1,7 @@
 # Caveman
 
+![Travis](https://travis-ci.org/andrewchilds/caveman.png?branch=master)
+
 Caveman is a 1KB JS templating engine, written for long-running single-page applications that render thousands or even tens of thousands of DOM elements at a time.
 
 Caveman's markup language is built on an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight, has zero dependencies, and adds a single `Caveman` variable to the global namespace, and seems to be [pretty fast](#benchmarks).
