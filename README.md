@@ -1,4 +1,8 @@
-# Caveman
+&nbsp;
+
+![Caveman](http://i.imgur.com/MPGs04C.png)
+
+-----
 
 ![Travis](https://travis-ci.org/andrewchilds/caveman.png?branch=master)
 
@@ -537,7 +541,7 @@ However a more [real-world test](http://jsperf.com/js-templating-performance/4) 
 
 YMMV.
 
-## Running the Jasmine tests
+## Running the test suite
 
 ```sh
 npm test
