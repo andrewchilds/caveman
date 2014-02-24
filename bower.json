@@ -1,0 +1,21 @@
+{
+  "name": "caveman",
+  "main": "caveman.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/andrewchilds/caveman",
+  "authors": [
+    "Andrew Childs <ac@glomerate.com>"
+  ],
+  "description": "Fast JS template engine",
+  "keywords": [
+    "caveman",
+    "javascript",
+    "template",
+    "html"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "spec"
+  ]
+}

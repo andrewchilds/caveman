@@ -8,8 +8,14 @@ Caveman's markup language is built on an extensible macro system, which allows f
 
 ## Installation
 
+Caveman is available through npm and bower:
+
 ```sh
 npm install caveman
+```
+
+```sh
+bower install caveman
 ```
 
 ## Usage
