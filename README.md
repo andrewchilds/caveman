@@ -6,13 +6,11 @@
 
 ![Travis](https://travis-ci.org/andrewchilds/caveman.png?branch=master)
 
-Caveman is a 1KB JS templating engine, written for long-running single-page applications that render thousands or even tens of thousands of DOM elements at a time.
+Caveman is a 1KB JS templating engine, written for long-running single-page applications that render tens of thousands of DOM elements at a time.
 
-Caveman's markup language is built on an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight, has zero dependencies, and adds a single `Caveman` variable to the global namespace, and seems to be [pretty fast](#benchmarks).
+Caveman's markup language is built using an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight (1kb compressed), has no dependencies, adds a single `Caveman` variable to the global namespace, and seems from [initial benchmark tests](#benchmarks) to be very fast, almost as fast as native JS concatenation.
 
 ## Installation
-
-Caveman is available through npm and bower:
 
 ```sh
 npm install caveman
@@ -22,32 +20,81 @@ npm install caveman
 bower install caveman
 ```
 
-## Usage
+## Usage Examples
+
+### 1. Client-side Compilation & Rendering
+
+This is an easy setup, but it's not as fast as precompiling your templates on the server (see below). This example assumes jQuery already exists on the page.
+
+```html
+<script src="/path/to/caveman.js"></script>
+<script class="caveman-template" data-name="blogPosts" type="text/x-template">
+<div class="posts">
+  {{- for d.posts }}
+    {{- render blogPost }}
+  {{- end }}
+</div>
+</script>
+<script class="caveman-template" data-name="blogPost" type="text/x-template">
+<div class="post">
+  <h2>{{d.title}}</h2>
+  <div class="article">{{d.article}}</div>
+</div>
+</script>
+<script>
+$(function () {
+
+  // Compile and register all templates using jQuery and the data-name attribute:
+  $('.caveman-template').each(function () {
+    Caveman.register($(this).data('name'), $(this).html());
+  });
+
+  // Rendering
+  var data = {
+    posts: [
+      { title: 'My Second Awesome Blog Post', article: '...' },
+      { title: 'My First Awesome Blog Post', article: '...' }
+    ]
+  };
+  var html = Caveman.render('blogPosts', data);
+  document.getElementById('content').innerHTML = html;
+
+});
+</script>
+<div id="content"></div>
+```
+
+### 2. Server-side Compilation, Client-side Rendering
 
 Assuming a node application with templates in `app/views/templates/*.html` and generated assets in `public/bundled`.
 
-1. Using Grunt and the [grunt-contrib-caveman](https://github.com/andrewchilds/grunt-contrib-caveman) package, add this to your Gruntfile config:
+1. Using Grunt and [grunt-contrib-caveman](https://github.com/andrewchilds/grunt-contrib-caveman), configure your Caveman task:
 
     ```js
-    caveman: {
-      compile: {
-        src: ['app/views/templates/*.html'],
-        dest: 'public/bundled/templates.js'
+    grunt.initConfig({
+      caveman: {
+        compile: {
+          src: ['app/views/templates/*.html'],
+          dest: 'public/bundled/templates.js'
+        }
       }
-    }
-    ```
-    ```js
+    });
+
     grunt.loadNpmTasks('grunt-contrib-caveman');
     ```
 
-2. Run Grunt, include `./node_modules/caveman/caveman.js` and the newly created `./public/bundled/templates.js` script tags (in that order) in with your client-side javascripts however you normally would.
+2. Run Grunt to generate your `templates.js` file. Partials will be named according to their file names, without the ".html" extension.
 
-3. You should now have a registry of Caveman templates to use in your client-side code, like so:
+3. You should now have a Caveman template registry ready to go on the client-side:
 
-    ```js
-    var myTemplateData = { foo: [1, 2, 3], bar: true };
-    var html = Caveman.render('myTemplateName', myTemplateData);
-    document.getElementById('foo').innerHTML = html;
+    ```html
+    <script src="/path/to/caveman.js"></script>
+    <script src="/bundled/templates.js"></script>
+    <script>
+      var myTemplateData = { foo: [1, 2, 3], bar: true };
+      var html = Caveman.render('myTemplateName', myTemplateData);
+      document.getElementById('foo').innerHTML = html;
+    </script>
     ```
 
 ## Concepts
@@ -62,7 +109,7 @@ Caveman does not escape input by default. It expects you to have already sanitiz
 
 ### Scope
 
-Unlike most template engines, Caveman doesn't use `with` blocks or do any scope lookup. So for top-level variables you'll need to use `{{d.foo}}` instead of `{{foo}}`. Within `for` and `each` blocks, the scope of `d` becomes block-level, as illustrated here.
+Caveman doesn't use `with` blocks or do any scope lookup under the hood. Data is passed in to a Caveman template as the argument `d`, so instead of `{{foo}}` you use `{{d.foo}}`. Within `for` and `each` blocks, the scope of `d` becomes block-level, as illustrated here:
 
 ```html
 <div class="posts">
@@ -95,7 +142,7 @@ Unlike most template engines, Caveman doesn't use `with` blocks or do any scope 
 
 ### Custom Macros
 
-Macros can be easily added or modified. For example, here is a macro that adds zebra stripes and "first" and "last" classes, depending on where it is in the array:
+Macros can be added or modified quite easily, even after templates are compiled. For example, a "tableClass" macro that adds zebra stripes and "first" and "last" classes, depending on where it is in the array:
 
 ```js
 Caveman.addMacro('tableClass', {
