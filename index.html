@@ -27,9 +27,9 @@
         </ul>
       </header>
       <section>
-        <p>Caveman is a 1KB JS templating engine, written for long-running single-page applications that render thousands or even tens of thousands of DOM elements at a time.</p>
+        <p>Caveman is a 1KB JS templating engine, written for long-running single-page applications that render tens of thousands of DOM elements at a time.</p>
 
-<p>Caveman's markup language is built on an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight, has zero dependencies, and adds a single <code>Caveman</code> variable to the global namespace, and seems to be <a href="#benchmarks">pretty fast</a>.</p>
+<p>Caveman's markup language is built using an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight (1kb compressed), has no dependencies, adds a single <code>Caveman</code> variable to the global namespace, and seems from <a href="#benchmarks">initial benchmark tests</a> to be very fast, almost as fast as native JS concatenation.</p>
 
 <h2>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
@@ -37,33 +37,86 @@
 <div class="highlight highlight-sh"><pre>npm install caveman
 </pre></div>
 
+<div class="highlight highlight-sh"><pre>bower install caveman
+</pre></div>
+
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a name="usage-examples" class="anchor" href="#usage-examples"><span class="octicon octicon-link"></span></a>Usage Examples</h2>
+
+<h3>
+<a name="1-client-side-compilation--rendering" class="anchor" href="#1-client-side-compilation--rendering"><span class="octicon octicon-link"></span></a>1. Client-side Compilation &amp; Rendering</h3>
+
+<p>This is an easy setup, but it's not as fast as precompiling your templates on the server (see below). This example assumes jQuery already exists on the page.</p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"/path/to/caveman.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">class=</span><span class="s">"caveman-template"</span> <span class="na">data-name=</span><span class="s">"blogPosts"</span> <span class="na">type=</span><span class="s">"text/x-template"</span><span class="nt">&gt;</span>
+<span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">"posts"</span><span class="o">&gt;</span>
+  <span class="p">{{</span><span class="o">-</span> <span class="k">for</span> <span class="nx">d</span><span class="p">.</span><span class="nx">posts</span> <span class="p">}}</span>
+    <span class="p">{{</span><span class="o">-</span> <span class="nx">render</span> <span class="nx">blogPost</span> <span class="p">}}</span>
+  <span class="p">{{</span><span class="o">-</span> <span class="nx">end</span> <span class="p">}}</span>
+<span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">class=</span><span class="s">"caveman-template"</span> <span class="na">data-name=</span><span class="s">"blogPost"</span> <span class="na">type=</span><span class="s">"text/x-template"</span><span class="nt">&gt;</span>
+<span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">"post"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="p">{{</span><span class="nx">d</span><span class="p">.</span><span class="nx">title</span><span class="p">}}</span><span class="o">&lt;</span><span class="err">/h2&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">"article"</span><span class="o">&gt;</span><span class="p">{{</span><span class="nx">d</span><span class="p">.</span><span class="nx">article</span><span class="p">}}</span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;script&gt;</span>
+<span class="nx">$</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+  <span class="c1">// Compile and register all templates using jQuery and the data-name attribute:</span>
+  <span class="nx">$</span><span class="p">(</span><span class="s1">'.caveman-template'</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">Caveman</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">'name'</span><span class="p">),</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">html</span><span class="p">());</span>
+  <span class="p">});</span>
+
+  <span class="c1">// Rendering</span>
+  <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">posts</span><span class="o">:</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s1">'My Second Awesome Blog Post'</span><span class="p">,</span> <span class="nx">article</span><span class="o">:</span> <span class="s1">'...'</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s1">'My First Awesome Blog Post'</span><span class="p">,</span> <span class="nx">article</span><span class="o">:</span> <span class="s1">'...'</span> <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">};</span>
+  <span class="kd">var</span> <span class="nx">html</span> <span class="o">=</span> <span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'blogPosts'</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'content'</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">html</span><span class="p">;</span>
+
+<span class="p">});</span>
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"content"</span><span class="nt">&gt;&lt;/div&gt;</span>
+</pre></div>
+
+<h3>
+<a name="2-server-side-compilation-client-side-rendering" class="anchor" href="#2-server-side-compilation-client-side-rendering"><span class="octicon octicon-link"></span></a>2. Server-side Compilation, Client-side Rendering</h3>
 
 <p>Assuming a node application with templates in <code>app/views/templates/*.html</code> and generated assets in <code>public/bundled</code>.</p>
 
 <ol>
 <li>
-<p>Using Grunt and the <a href="https://github.com/andrewchilds/grunt-contrib-caveman">grunt-contrib-caveman</a> package, add this to your Gruntfile config:</p>
+<p>Using Grunt and <a href="https://github.com/andrewchilds/grunt-contrib-caveman">grunt-contrib-caveman</a>, configure your Caveman task:</p>
 
-<div class="highlight highlight-js"><pre><span class="nx">caveman</span><span class="o">:</span> <span class="p">{</span>
-  <span class="nx">compile</span><span class="o">:</span> <span class="p">{</span>
-    <span class="nx">src</span><span class="o">:</span> <span class="p">[</span><span class="s1">'app/views/templates/*.html'</span><span class="p">],</span>
-    <span class="nx">dest</span><span class="o">:</span> <span class="s1">'public/bundled/templates.js'</span>
+<div class="highlight highlight-js"><pre><span class="nx">grunt</span><span class="p">.</span><span class="nx">initConfig</span><span class="p">({</span>
+  <span class="nx">caveman</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">compile</span><span class="o">:</span> <span class="p">{</span>
+      <span class="nx">src</span><span class="o">:</span> <span class="p">[</span><span class="s1">'app/views/templates/*.html'</span><span class="p">],</span>
+      <span class="nx">dest</span><span class="o">:</span> <span class="s1">'public/bundled/templates.js'</span>
+    <span class="p">}</span>
   <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
+<span class="p">});</span>
 
-<div class="highlight highlight-js"><pre><span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">'grunt-contrib-caveman'</span><span class="p">);</span>
+<span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">'grunt-contrib-caveman'</span><span class="p">);</span>
 </pre></div>
 </li>
-<li><p>Run Grunt, include <code>./node_modules/caveman/caveman.js</code> and the newly created <code>./public/bundled/templates.js</code> script tags (in that order) in with your client-side javascripts however you normally would.</p></li>
+<li><p>Run Grunt to generate your <code>templates.js</code> file. Partials will be named according to their file names, without the ".html" extension.</p></li>
 <li>
-<p>You should now have a registry of Caveman templates to use in your client-side code, like so:</p>
+<p>You should now have a Caveman template registry ready to go on the client-side:</p>
 
-<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">myTemplateData</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="nx">bar</span><span class="o">:</span> <span class="kc">true</span> <span class="p">};</span>
-<span class="kd">var</span> <span class="nx">html</span> <span class="o">=</span> <span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'myTemplateName'</span><span class="p">,</span> <span class="nx">myTemplateData</span><span class="p">);</span>
-<span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'foo'</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">html</span><span class="p">;</span>
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"/path/to/caveman.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"/bundled/templates.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script&gt;</span>
+  <span class="kd">var</span> <span class="nx">myTemplateData</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="nx">bar</span><span class="o">:</span> <span class="kc">true</span> <span class="p">};</span>
+  <span class="kd">var</span> <span class="nx">html</span> <span class="o">=</span> <span class="nx">Caveman</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'myTemplateName'</span><span class="p">,</span> <span class="nx">myTemplateData</span><span class="p">);</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'foo'</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">html</span><span class="p">;</span>
+<span class="nt">&lt;/script&gt;</span>
 </pre></div>
 </li>
 </ol><h2>
@@ -80,7 +133,7 @@
 <h3>
 <a name="scope" class="anchor" href="#scope"><span class="octicon octicon-link"></span></a>Scope</h3>
 
-<p>Unlike most template engines, Caveman doesn't use <code>with</code> blocks or do any scope lookup. So for top-level variables you'll need to use <code>{{d.foo}}</code> instead of <code>{{foo}}</code>. Within <code>for</code> and <code>each</code> blocks, the scope of <code>d</code> becomes block-level, as illustrated here.</p>
+<p>Caveman doesn't use <code>with</code> blocks or do any scope lookup under the hood. Data is passed in to a Caveman template as the argument <code>d</code>, so instead of <code>{{foo}}</code> you use <code>{{d.foo}}</code>. Within <code>for</code> and <code>each</code> blocks, the scope of <code>d</code> becomes block-level, as illustrated here:</p>
 
 <div class="highlight highlight-html"><pre><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"posts"</span><span class="nt">&gt;</span>
   {{- for d.posts as post }}
@@ -113,7 +166,7 @@
 <h3>
 <a name="custom-macros" class="anchor" href="#custom-macros"><span class="octicon octicon-link"></span></a>Custom Macros</h3>
 
-<p>Macros can be easily added or modified. For example, here is a macro that adds zebra stripes and "first" and "last" classes, depending on where it is in the array:</p>
+<p>Macros can be added or modified quite easily, even after templates are compiled. For example, a "tableClass" macro that adds zebra stripes and "first" and "last" classes, depending on where it is in the array:</p>
 
 <div class="highlight highlight-js"><pre><span class="nx">Caveman</span><span class="p">.</span><span class="nx">addMacro</span><span class="p">(</span><span class="s1">'tableClass'</span><span class="p">,</span> <span class="p">{</span>
   <span class="nx">find</span><span class="o">:</span> <span class="sr">/^tableClass$/</span>
@@ -558,7 +611,7 @@ arrays of objects (dot and bracket notation): 2
 <p>YMMV.</p>
 
 <h2>
-<a name="running-the-jasmine-tests" class="anchor" href="#running-the-jasmine-tests"><span class="octicon octicon-link"></span></a>Running the Jasmine tests</h2>
+<a name="running-the-test-suite" class="anchor" href="#running-the-test-suite"><span class="octicon octicon-link"></span></a>Running the test suite</h2>
 
 <div class="highlight highlight-sh"><pre>npm <span class="nb">test</span>
 </pre></div>
