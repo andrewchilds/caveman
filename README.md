@@ -68,7 +68,7 @@ $(function () {
 
 Assuming a node application with templates in `app/views/templates/*.html` and generated assets in `public/bundled`.
 
-1. Using Grunt and [grunt-contrib-caveman](https://github.com/andrewchilds/grunt-contrib-caveman), configure your Caveman task:
+1. Using Grunt and [grunt-caveman](https://github.com/andrewchilds/grunt-caveman), configure your Caveman task:
 
     ```js
     grunt.initConfig({
@@ -80,7 +80,7 @@ Assuming a node application with templates in `app/views/templates/*.html` and g
       }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-caveman');
+    grunt.loadNpmTasks('grunt-caveman');
     ```
 
 2. Run Grunt to generate your `templates.js` file. Partials will be named according to their file names, without the ".html" extension.
