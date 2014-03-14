@@ -146,10 +146,10 @@ Macros can be added or modified quite easily, even after templates are compiled.
 
 ```js
 Caveman.addMacro('tableClass', {
-  find: /^tableClass$/
+  find: /^tableClass$/,
   replace: "str += (_i % 2 ? 'even' : 'odd');" +
     "if (_i === 0) { str += ' first'; }" +
-    "if (_i === _len - 1) { str += ' last'; }";
+    "if (_i === _len - 1) { str += ' last'; }"
 });
 
 data = {
