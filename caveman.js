@@ -279,7 +279,7 @@
     find: /^render /,
     prefix: 'var _Cr = Caveman.render;',
     replace: function (str) {
-      return str.replace(/^render (.*) (.*)/, 'str += _Cr(\'$1\', $2);')
+      return str.replace(/^render ([^ ]*) (.*)/, 'str += _Cr(\'$1\', $2);')
         .replace(/^render (.*)/, 'str += _Cr(\'$1\', d);');
     }
   });

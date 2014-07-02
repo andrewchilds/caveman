@@ -52,3 +52,12 @@ describe 'Partials', ->
       '<a href="mailto:ralph@gmail.com" class="active">ralph@gmail.com</a>' +
       '</div>'
     expect(Caveman(template, data)).toEqual(expected)
+
+  it 'should be able to render a partial with an object literal as scope', ->
+    template = """
+      <div class="user">{{- render emailLink { email: 'example@gmail.com' } }}</div>
+      """
+    expected = '<div class="user">' +
+      '<a href="mailto:example@gmail.com" class="">example@gmail.com</a>' +
+      '</div>'
+    expect(Caveman(template, {})).toEqual(expected)
