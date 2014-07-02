@@ -1,12 +1,12 @@
 {
   "name": "caveman",
   "main": "caveman.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/andrewchilds/caveman",
   "authors": [
     "Andrew Childs <ac@glomerate.com>"
   ],
-  "description": "Fast JS template engine",
+  "description": "A fast JS templating engine.",
   "keywords": [
     "caveman",
     "javascript",

@@ -1,10 +1,10 @@
 {
   "name": "caveman",
-  "description": "Fast JS template engine",
+  "description": "A fast JS templating engine.",
   "author": {
     "name": "Andrew Childs"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "caveman.js",
   "scripts": {
     "test": "./node_modules/jasmine-node/bin/jasmine-node --coffee --color --verbose ./spec"
