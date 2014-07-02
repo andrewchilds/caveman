@@ -2,7 +2,7 @@
  * Caveman
  * https://github.com/andrewchilds/caveman
  */
-;(function () {
+(function () {
 
   var partials = {};
   var macros = {};
@@ -82,7 +82,7 @@
 
   var expandShortcuts = function (str) {
     var match = false;
-    each(macros, function (macro, macroName) {
+    each(macros, function (macro) {
       var shortcut = macro.shortcut;
       if (!match && shortcut && shortcut.find.test(str)) {
         match = true;
@@ -164,12 +164,12 @@
         if (isScript(code)) {
           output += translateScript(code);
         } else {
-          output += "str += _CfS(" + code + ");"
+          output += "str += _CfS(" + code + ");";
         }
       }
       if (text) {
         text = escapeText(text);
-        output += ("str += '" + text + "';")
+        output += ("str += '" + text + "';");
       }
     }
 
@@ -324,7 +324,8 @@
     if (typeof template === 'string') {
       template = Caveman(template);
     }
-    return partials[partialName] = template;
+    partials[partialName] = template;
+    return partials[partialName];
   };
 
   var render = function (partialName, data) {

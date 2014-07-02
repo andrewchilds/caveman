@@ -1,0 +1,12 @@
+{
+  "browser": true,
+  "eqeqeq": true,
+  "evil": true,
+  "forin": true,
+  "indent": 2,
+  "node": true,
+  "undef": true,
+  "unused": true,
+  "trailing": true,
+  "predef": [ "define" ]
+}
