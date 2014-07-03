@@ -6,6 +6,10 @@ beforeEach ->
   Caveman.options.shrinkWrap = true;
 
 describe 'Macros', ->
+  template = '<ul>{{- for d.uls as ul }}<li>{{ul.li}}</li>{{/}}</ul>'
+  Caveman.register('unorderedList', template)
+  template = '{{- for d.divs as div }}<div>{{- render unorderedList div }}</div>{{/}}'
+  Caveman.register('listOfDivs', template)
 
   it 'if with truthy comparison', ->
     data = {
@@ -207,6 +211,64 @@ describe 'Macros', ->
           '</div>' +
         '</div>' +
       '</div>'
+    expect(Caveman(template, data)).toEqual(expected)
+
+  it 'for blocks inside partials inside for blocks', ->
+    data = {
+      divs: [
+        { uls: [ { li: 'a1' }, { li: 'a2' } ] }
+        { uls: [ { li: 'b1' }, { li: 'b2' } ] }
+        { uls: [ { li: 'c1' }, { li: 'c2' } ] }
+      ]
+    }
+    template = '<div>{{- for d.divs as div }}{{- for div.uls as ul }}{{ul.li}}{{/}}{{/}}</div><div>{{- render listOfDivs }}</div>'
+    expected = '<div>a1a2b1b2c1c2</div>' +
+      '<div>' +
+        '<div><ul><li>a1</li><li>a2</li></ul></div>' +
+        '<div><ul><li>b1</li><li>b2</li></ul></div>' +
+        '<div><ul><li>c1</li><li>c2</li></ul></div>' +
+      '</div>'
+    expect(Caveman(template, data)).toEqual(expected)
+
+  it 'deeply nested for blocks with if blocks', ->
+    data = {
+      arr: [ [ [ [ [ 'a1', 'a2', 'a3' ], [ 'b1', 'b2', 'b3' ] ] ] ] ]
+    }
+    template = """
+      {{- if d.arr }}
+        {{- for d.arr }}
+          {{_i}},
+          {{- for d }}
+            {{_i}},
+            {{- for d }}
+              {{_i}},
+              {{- if d }}
+                {{- for d }}
+                  {{_i}},
+                  {{- for d }}
+                    {{d}},
+                  {{/}}
+                {{/}}
+              {{/}}
+            {{/}}
+          {{/}}
+        {{/}}
+        {{- for d.arr as a }}
+          {{- for a as a }}
+            {{- for a as a }}
+              {{- for a as a }}
+                {{- if d }}
+                  {{- for a as a }}
+                    {{a}}
+                  {{/}}
+                {{/}}
+              {{/}}
+            {{/}}
+          {{/}}
+        {{/}}
+      {{/}}
+      """
+    expected = '0,0,0,0,a1,a2,a3,1,b1,b2,b3,a1a2a3b1b2b3'
     expect(Caveman(template, data)).toEqual(expected)
 
   it 'each', ->

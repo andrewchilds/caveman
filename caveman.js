@@ -248,7 +248,9 @@
     blockEnd: function () {
       var id = getBlockState().length - 1;
       var resetIndex = '';
-      if (id >= 0) {
+      var lastState = getBlockState()[id] + '';
+      var lastStateIsForBlock = lastState.indexOf('_ds.pop()') !== -1;
+      if (id >= 0 && lastStateIsForBlock) {
         resetIndex = '_i = _i' + id + '; _len = _len' + id + ';';
       }
       return '} d = _ds.pop();' + resetIndex;
