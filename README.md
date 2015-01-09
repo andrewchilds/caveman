@@ -99,25 +99,25 @@ Assuming a node application with templates in `app/views/templates/*.html` and g
 
 ### 3. Server-side Compilation and Rendering
 
-You can also use Caveman for static site generation. Let's assume you have your caveman templates in `templates/*.html` and generated assets in `public`. Using Grunt and [grunt-caveman](https://github.com/andrewchilds/grunt-caveman), configure your Caveman task like so:
+You can also use Caveman for static site generation. Let's assume you have your caveman templates in `./templates` and generated assets in `./public`. Using Grunt and [grunt-caveman](https://github.com/andrewchilds/grunt-caveman), configure your Caveman task like so:
 
-    ```js
-    grunt.initConfig({
-      caveman: {
-        compile: {
-          src: ['templates/*.html'],
-          render: {
-            // 'homePage' equates to templates/homePage.html
-            'homePage': 'public/index.html',
-            'aboutPage': 'public/about/index.html',
-            'contactPage': 'public/contact/index.html'
-          }
-        }
+```js
+grunt.initConfig({
+  caveman: {
+    compile: {
+      src: ['templates/*.html'],
+      render: {
+        // 'homePage' equates to templates/homePage.html
+        'homePage': 'public/index.html',
+        'aboutPage': 'public/about/index.html',
+        'contactPage': 'public/contact/index.html'
       }
-    });
+    }
+  }
+});
 
-    grunt.loadNpmTasks('grunt-caveman');
-    ```
+grunt.loadNpmTasks('grunt-caveman');
+```
 
 ## Concepts
 
