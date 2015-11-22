@@ -83,3 +83,9 @@ describe 'Interpolation', ->
     template = '| {{{d.a{{d.b}} | {{}} | }}{{ | \\{\\{hello\\}\\} |'
     expected = '| {d.a2 |  |  | {{hello}} |'
     expect(Caveman(template, data)).toEqual(expected)
+
+  it 'comments', ->
+    data = {}
+    template = '{{// This is a comment }}'
+    expected = ''
+    expect(Caveman(template, data)).toEqual(expected)

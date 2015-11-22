@@ -101,6 +101,10 @@
     return str && str.charAt(0) === '-';
   };
 
+  var isComment = function (str) {
+    return str && str.slice(0, 2) === '//';
+  };
+
   var translateScript = function (str) {
     str = str.substr(1).trim(); // remove dash character
 
@@ -161,7 +165,9 @@
 
       if (code) {
         code = expandShortcuts(code);
-        if (isScript(code)) {
+        if (isComment(code)) {
+          continue;
+        } else if (isScript(code)) {
           output += translateScript(code);
         } else {
           output += "str += _CfS(" + code + ");";
