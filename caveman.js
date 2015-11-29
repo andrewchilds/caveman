@@ -166,7 +166,7 @@
       if (code) {
         code = expandShortcuts(code);
         if (isComment(code)) {
-          continue;
+          output += '';
         } else if (isScript(code)) {
           output += translateScript(code);
         } else {
