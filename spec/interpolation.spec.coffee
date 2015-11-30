@@ -83,3 +83,15 @@ describe 'Interpolation', ->
     template = '| {{{d.a{{d.b}} | {{}} | }}{{ | \\{\\{hello\\}\\} |'
     expected = '| {d.a2 |  |  | {{hello}} |'
     expect(Caveman(template, data)).toEqual(expected)
+
+  it 'block comments', ->
+    data = {}
+    template = '{{// This is a comment }}'
+    expected = ''
+    expect(Caveman(template, data)).toEqual(expected)
+
+  it 'inline comments', ->
+    data = {}
+    template = 'foo{{// This is a comment }}bar'
+    expected = 'foobar'
+    expect(Caveman(template, data)).toEqual(expected)
