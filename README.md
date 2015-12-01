@@ -406,7 +406,7 @@ data = {
 #### {{- with *a.b.c.obj* }}
 #### {{- with *a.b.c.obj* as *obj* }}
 
-`with` allows you to scope an object to `d` (or to anything, using `with foo as bar`) within a block.
+`with` allows you to scope an object to `d` (or to a named variable using `with foo as bar`) within a block.
 
 ```html
 <!-- template -->
@@ -415,11 +415,6 @@ data = {
     <h2>{{author.name}}</h2>
   {{- end }}
 {{- end }}
-
-<!-- rendered HTML -->
-<div>1 x 1 = 1</div>
-<div>2 x 2 = 4</div>
-<div>3 x 3 = 9</div>
 ```
 
 -----
@@ -618,4 +613,4 @@ npm test
 
 ## License
 
-MIT. Copyright &copy; 2014 Andrew Childs
+MIT. Copyright &copy; 2015 Andrew Childs
