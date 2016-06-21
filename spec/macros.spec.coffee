@@ -1,9 +1,10 @@
 Caveman = require('../caveman.js')
 
 beforeEach ->
-  Caveman.options.openTag = '{{';
-  Caveman.options.closeTag = '}}';
-  Caveman.options.shrinkWrap = true;
+  Caveman.options.openTag = '{{'
+  Caveman.options.closeTag = '}}'
+  Caveman.options.shrinkWrap = true
+  Caveman.options.escapeByDefault = false
 
 describe 'Macros', ->
   template = '<ul>{{- for d.uls as ul }}<li>{{ul.li}}</li>{{/}}</ul>'
@@ -424,10 +425,38 @@ describe 'Macros', ->
       '<div>3 x 3 = 9</div>'
     expect(Caveman(template, data)).toEqual(expected)
 
-  it 'escape', ->
+describe 'Escaping', ->
+
+  it 'does not escape by default', ->
     data = {
       html: '<script>alert("HELLO XSS!");</script> & \''
     }
-    template = '{{- escape d.html }}'
-    expected = '&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;'
+    template = '<div>{{d.html}}</div>'
+    expected = '<div><script>alert("HELLO XSS!");</script> & \'</div>'
+    expect(Caveman(template, data)).toEqual(expected)
+
+  it 'escape macro', ->
+    data = {
+      html: '<script>alert("HELLO XSS!");</script> & \''
+    }
+    template = '<div>{{- escape d.html }}</div>'
+    expected = '<div>&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;</div>'
+    expect(Caveman(template, data)).toEqual(expected)
+
+  it 'escape macro will not double-escape if escapeByDefault is true', ->
+    data = {
+      html: '<script>alert("HELLO XSS!");</script> & \''
+    }
+    template = '<div>{{- escape d.html }}</div>'
+    expected = '<div>&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;</div>'
+    Caveman.options.escapeByDefault = true
+    expect(Caveman(template, data)).toEqual(expected)
+
+  it 'escapes by default using the escapeByDefault option', ->
+    data = {
+      html: '<script>alert("HELLO XSS!");</script> & \''
+    }
+    template = '<div>{{d.html}}</div>'
+    expected = '<div>&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;</div>'
+    Caveman.options.escapeByDefault = true
     expect(Caveman(template, data)).toEqual(expected)

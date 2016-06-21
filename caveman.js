@@ -10,6 +10,7 @@
   var prefixes = {};
 
   var options = {
+    escapeByDefault: false,
     openTag: '{{',
     closeTag: '}}',
     shrinkWrap: false // remove whitespace between variables
@@ -183,7 +184,13 @@
   };
 
   var forceStr = function (str) {
-    return (typeof str === 'undefined' || str === null) ? '' : str;
+    str = (typeof str === 'undefined' || str === null) ? '' : str;
+
+    if (options.escapeByDefault && str) {
+      return escapeHTML(str);
+    }
+
+    return str;
   };
 
   // Readymade macros
