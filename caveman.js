@@ -10,6 +10,7 @@
   var prefixes = {};
 
   var options = {
+    escapeByDefault: false,
     openTag: '{{',
     closeTag: '}}',
     shrinkWrap: false // remove whitespace between variables
@@ -36,11 +37,11 @@
   };
 
   var escapeHTML = function (str) {
-    return (str + '').replace(/&/g, '&amp;')
+    return str ? (str + '').replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\'/g, '&#39;')
-      .replace(/\"/g, '&quot;');
+      .replace(/\"/g, '&quot;') : '';
   };
 
   var shrinkWrapTemplate = function (str) {
@@ -183,7 +184,13 @@
   };
 
   var forceStr = function (str) {
-    return (typeof str === 'undefined' || str === null) ? '' : str;
+    str = (typeof str === 'undefined' || str === null) ? '' : str;
+
+    if (options.escapeByDefault && str) {
+      return escapeHTML(str);
+    }
+
+    return str;
   };
 
   // Readymade macros
@@ -311,6 +318,13 @@
     prefix: 'var _CeH = Caveman.escapeHTML;',
     replace: function (str) {
       return str.replace(/^escape (.*)/, 'str += _CeH($1);');
+    }
+  });
+
+  addMacro('unescape', {
+    find: /^unescape /,
+    replace: function (str) {
+      return str.replace(/^unescape (.*)/, 'str += ($1);');
     }
   });
 

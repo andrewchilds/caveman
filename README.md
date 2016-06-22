@@ -6,9 +6,9 @@
 
 ![Travis](https://travis-ci.org/andrewchilds/caveman.png?branch=master)
 
-Caveman is a 1KB JS templating engine, written for long-running single-page applications that render tens of thousands of DOM elements at a time.
+Caveman is a 1kb JS templating engine, written for long-running single-page applications that render tens of thousands of DOM elements at a time.
 
-Caveman's markup language is built using an extensible macro system, which allows for arbitrary script execution, explicit logic (instead of the bastardized "logic-less" logic of mustache/etc), and partials. The library is lightweight (1kb compressed), has no dependencies, adds a single `Caveman` variable to the global namespace, and seems from [initial benchmark tests](#benchmarks) to be very fast, almost as fast as native JS concatenation.
+Caveman's markup language is built using an extensible macro system, which allows for arbitrary script execution, explicit logic, and partials. The library is lightweight (1kb compressed), has no dependencies, adds a single `Caveman` variable to the global namespace, and seems from [initial benchmark tests](#benchmarks) to be very fast, nearly as fast as native JS concatenation.
 
 ## Installation
 
@@ -123,7 +123,7 @@ grunt.loadNpmTasks('grunt-caveman');
 
 ### Escaping
 
-Caveman does not escape input by default. It expects you to have already sanitized your data before rendering. If you want to escape HTML in your templates, you can do that with the `escape` macro:
+Caveman does not escape input by default, but you can enable that by setting `Caveman.options.escapeByDefault = true`. If you want to escape an individual string, you can do that with the `escape` macro:
 
 ```html
 <div>{{- escape d.html }}</div>
@@ -489,6 +489,20 @@ Caveman.render('emailList', data);
 </div>
 ```
 
+-----
+
+#### {{// *comment* }}
+
+Allows comments in a template without being included in the rendered output.
+
+```html
+<!-- Template -->
+Foo {{// This is a comment. }} bar.
+
+<!-- Rendered output -->
+Foo bar.
+```
+
 ## Method Reference
 
 #### Caveman
@@ -578,19 +592,25 @@ Caveman.addMacro('print', {
 
 -----
 
-## Caveman.options
+## Options
 
 To use custom tags (e.g. ERB-style tags), override these two options before compiling your templates:
 
 ```js
-Caveman.options.openTag = '<%';
-Caveman.options.closeTag = '%>';
+Caveman.options.openTag = '<%'; // defaults to '{{'
+Caveman.options.closeTag = '%>'; // defaults to '}}'
 ```
 
 Remove indentation by shrink wrapping your templates:
 
 ```js
-Caveman.options.shrinkWrap = true;
+Caveman.options.shrinkWrap = true; // defaults to false
+```
+
+Automatically escape all input:
+
+```js
+Caveman.options.escapeByDefault = true; // defaults to false
 ```
 
 ## Benchmarks
@@ -613,4 +633,4 @@ npm test
 
 ## License
 
-MIT. Copyright &copy; 2015 Andrew Childs
+MIT. Copyright &copy; 2016 Andrew Childs
