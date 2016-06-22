@@ -37,11 +37,11 @@
   };
 
   var escapeHTML = function (str) {
-    return (str + '').replace(/&/g, '&amp;')
+    return str ? (str + '').replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\'/g, '&#39;')
-      .replace(/\"/g, '&quot;');
+      .replace(/\"/g, '&quot;') : '';
   };
 
   var shrinkWrapTemplate = function (str) {
