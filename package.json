@@ -4,7 +4,7 @@
   "author": {
     "name": "Andrew Childs"
   },
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "caveman.js",
   "scripts": {
     "test": "./node_modules/jasmine-node/bin/jasmine-node --coffee --color --verbose ./spec"
