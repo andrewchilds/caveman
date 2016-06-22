@@ -321,6 +321,13 @@
     }
   });
 
+  addMacro('unescape', {
+    find: /^unescape /,
+    replace: function (str) {
+      return str.replace(/^unescape (.*)/, 'str += ($1);');
+    }
+  });
+
   addMacro('first', {
     find: /^first$/,
     replace: 'if (_i === 0) {',

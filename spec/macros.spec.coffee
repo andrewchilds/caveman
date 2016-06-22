@@ -460,3 +460,12 @@ describe 'Escaping', ->
     expected = '<div>&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;</div>'
     Caveman.options.escapeByDefault = true
     expect(Caveman(template, data)).toEqual(expected)
+
+  it 'unescape overrides escapeByDefault', ->
+    data = {
+      html: '<script>alert("HELLO XSS!");</script> & \''
+    }
+    template = '<div>{{- unescape d.html }}</div>'
+    expected = '<div><script>alert("HELLO XSS!");</script> & \'</div>'
+    Caveman.options.escapeByDefault = true
+    expect(Caveman(template, data)).toEqual(expected)
