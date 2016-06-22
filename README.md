@@ -378,6 +378,7 @@ data = {
   ]
 };
 ```
+
 ```html
 <!-- template -->
 {{- for d.cars as car }}
@@ -495,12 +496,55 @@ Caveman.render('emailList', data);
 
 Allows comments in a template without being included in the rendered output.
 
-```html
-<!-- Template -->
-Foo {{// This is a comment. }} bar.
+```js
+var template = 'Foo {{// This is a comment. }} bar';
 
-<!-- Rendered output -->
-Foo bar.
+Caveman.register('commentExample', template);
+Caveman.render('commentExample');
+```
+
+```html
+Foo  bar
+```
+
+-----
+
+#### {{- escape *expression* }}
+
+Prevent HTML/JS from being evaluated. You can enable this behavior globally by setting `Caveman.options.escapeByDefault = true`.
+
+```js
+var data = {
+  html: '<script>alert("HELLO!");</script> & \''
+};
+var template = '{{- escape d.html }}';
+
+Caveman.register('escapeExample', template);
+Caveman.render('escapeExample', data);
+```
+
+```html
+&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;
+```
+
+-----
+
+#### {{- unescape *expression* }}
+
+Allow HTML/JS to be evaluated, even if `Caveman.options.escapeByDefault` was already set to `true`.
+
+```js
+var data = {
+  html: '<script>alert("HELLO!");</script> & \''
+};
+var template = '{{- unescape d.html }}';
+
+Caveman.register('unescapeExample', template);
+Caveman.render('unescapeExample', data);
+```
+
+```html
+<script>alert("HELLO XSS!");</script> & '
 ```
 
 ## Method Reference
