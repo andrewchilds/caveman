@@ -1,7 +1,6 @@
 {
   "name": "caveman",
   "main": "caveman.js",
-  "version": "0.1.3",
   "homepage": "https://github.com/andrewchilds/caveman",
   "authors": [
     "Andrew Childs <ac@glomerate.com>"
@@ -16,6 +15,7 @@
   "license": "MIT",
   "ignore": [
     "node_modules",
-    "spec"
+    "spec",
+    ".travis.yml"
   ]
 }
