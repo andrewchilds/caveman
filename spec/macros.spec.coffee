@@ -437,10 +437,11 @@ describe 'Escaping', ->
 
   it 'escape macro', ->
     data = {
-      html: '<script>alert("HELLO XSS!");</script> & \''
+      html: '<script>alert("HELLO XSS!");</script> & \'',
+      zero: 0
     }
-    template = '<div>{{- escape d.html }}</div>'
-    expected = '<div>&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;</div>'
+    template = '<div>{{- escape d.html }}{{- escape d.zero }}</div>'
+    expected = '<div>&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;0</div>'
     expect(Caveman(template, data)).toEqual(expected)
 
   it 'escape macro will not double-escape if escapeByDefault is true', ->

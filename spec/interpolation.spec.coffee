@@ -4,6 +4,7 @@ beforeEach ->
   Caveman.options.openTag = '{{';
   Caveman.options.closeTag = '}}';
   Caveman.options.shrinkWrap = true;
+  Caveman.options.escapeByDefault = true;
 
 describe 'Interpolation', ->
 
@@ -26,9 +27,9 @@ describe 'Interpolation', ->
     expect(Caveman(template, data)).toEqual(expected)
 
   it 'numbers', ->
-    data = { a: 123, b: 0.0, c: 1.01, d: 1 }
-    template = '| {{d.a}} | {{d.b}} | {{d.c}} | {{d.d}} |'
-    expected = '| 123 | 0 | 1.01 | 1 |'
+    data = { a: 123, b: 0.0, c: 1.01, d: 1, e: 0 }
+    template = '| {{d.a}} | {{d.b}} | {{d.c}} | {{d.d}} | {{d.e}}'
+    expected = '| 123 | 0 | 1.01 | 1 | 0'
     expect(Caveman(template, data)).toEqual(expected)
 
   it 'boolean', ->

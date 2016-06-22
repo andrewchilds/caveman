@@ -37,11 +37,15 @@
   };
 
   var escapeHTML = function (str) {
-    return str ? (str + '').replace(/&/g, '&amp;')
+    return exists(str) ? (str + '').replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\'/g, '&#39;')
       .replace(/\"/g, '&quot;') : '';
+  };
+
+  var exists = function (obj) {
+    return typeof obj !== 'undefined' && obj !== null;
   };
 
   var shrinkWrapTemplate = function (str) {
@@ -184,7 +188,7 @@
   };
 
   var forceStr = function (str) {
-    str = (typeof str === 'undefined' || str === null) ? '' : str;
+    str = exists(str) ? str : '';
 
     if (options.escapeByDefault && str) {
       return escapeHTML(str);
