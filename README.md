@@ -524,7 +524,7 @@ Caveman.render('escapeExample', data);
 ```
 
 ```html
-&lt;script&gt;alert(&quot;HELLO XSS!&quot;);&lt;/script&gt; &amp; &#39;
+&lt;script&gt;alert(&quot;HELLO!&quot;);&lt;/script&gt; &amp; &#39;
 ```
 
 -----
@@ -544,7 +544,7 @@ Caveman.render('unescapeExample', data);
 ```
 
 ```html
-<script>alert("HELLO XSS!");</script> & '
+<script>alert("HELLO!");</script> & '
 ```
 
 ## Method Reference
